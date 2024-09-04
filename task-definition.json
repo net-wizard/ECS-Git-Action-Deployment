@@ -9,7 +9,7 @@
     "containerDefinitions": [
       {
         "name": "my-web-app-container",
-        "image": "313518852467.dkr.ecr.us-east-1.amazonaws.com/my-repo:latest",
+        "image": "${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.${{ secrets.AWS_REGION }}.amazonaws.com/my-repo:latest",
         "memory": 512,
         "cpu": 256,
         "essential": true,

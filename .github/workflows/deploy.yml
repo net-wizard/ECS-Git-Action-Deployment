@@ -3,26 +3,42 @@ name: CI/CD Pipeline
 on:
   push:
     branches:
-      - main
+      - master
 
 jobs:
   build:
     runs-on: ubuntu-latest
+
     steps:
     - name: Checkout code
       uses: actions/checkout@v3
 
     - name: Set up Docker Buildx
       uses: docker/setup-buildx-action@v2
+      
+    - name: Cache Docker layers
+      uses: actions/cache@v3
+      with:
+        path: /tmp/.buildx-cache
+        key: ${{ runner.os }}-docker-${{ github.sha }}
+        restore-keys: |
+          ${{ runner.os }}-docker-
 
     - name: Build Docker image
       run: |
         docker build -t my-web-app:latest .
 
+    - name: Set up AWS CLI
+      uses: aws-actions/configure-aws-credentials@v2
+      with:
+        aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+        aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+        aws-region: ${{ secrets.AWS_REGION }}
+
     - name: Log in to Amazon ECR
       uses: aws-actions/amazon-ecr-login@v1
 
-    - name: Push Docker image to ECR
+    - name: Push Docker image to Amazon ECR
       run: |
-        docker tag my-web-app:latest 313518852467.dkr.ecr.us-east-1.amazonaws.com/my-web-app:latest
-        docker push 313518852467.dkr.ecr.us-east-1.amazonaws.com/my-web-app:latest
+        docker tag my-web-app:latest ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.${{ secrets.AWS_REGION }}.amazonaws.com/my-repo:latest
+        docker push ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.${{ secrets.AWS_REGION }}.amazonaws.com/my-repo:latest
