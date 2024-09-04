@@ -9,8 +9,6 @@ This repository contains a simple HTML web application and a CI/CD pipeline conf
 - [Usage](#usage)
 - [Integration Tests](#integration-tests)
 - [Rollback Instructions](#rollback-instructions)
-- [Contributing](#contributing)
-- [License](#license)
 
 ## Overview
 
