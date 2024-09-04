@@ -42,3 +42,17 @@ jobs:
       run: |
         docker tag my-web-app:latest ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.${{ secrets.AWS_REGION }}.amazonaws.com/my-repo:latest
         docker push ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.${{ secrets.AWS_REGION }}.amazonaws.com/my-repo:latest
+
+    - name: Deploy to ECS
+      run: |
+        aws ecs update-service --cluster MyCluster --service my-repo-service --force-new-deployment
+
+    - name: Run Integration Tests
+      run: |
+        curl -s -o /dev/null -w "%{http_code}" http://3.223.129.49 | grep -q "200"
+
+    - name: Rollback Deployment
+      if: failure()
+      run: |
+        echo "Rolling back deployment due to test failures..."
+        aws ecs update-service --cluster MyCluster --service my-repo-service --force-new-deployment
